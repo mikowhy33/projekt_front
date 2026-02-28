@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { getRandomSentence } from '@/lib/sentences';
 import { Button } from './ui/button';
 import { PopUpComponent } from './PopUpComponent';
+import { ShowUserStats } from './showUserStats';
 
 export const MainPage = () => {
   const [usertext, setUserText] = useState<string>('');
@@ -14,6 +15,8 @@ export const MainPage = () => {
   const [timeLeft, setTimeLeft] = useState(60);
 
   const [showPopup, setShowPopup] = useState(false);
+
+  const [showStats, setShowStats] = useState(false);
 
   // liczenie poprawnych slow
   const targetWords = getRandomSentence1.split(' ');
@@ -104,6 +107,8 @@ export const MainPage = () => {
             }}
           ></PopUpComponent>
         )}
+
+        {showStats && <ShowUserStats onCancel={() => setShowStats(false)}></ShowUserStats>}
         <Table>
           <TableHeader>
             <TableRow>
@@ -141,6 +146,9 @@ export const MainPage = () => {
         />
 
         <div className="flex gap-4">
+          <Button onClick={() => setShowStats(true)} className="bg-amber-500">
+            Show all your stats
+          </Button>
           <Button onClick={() => saveLogic()}>Save your Progress</Button>
           <Button onClick={() => setShowPopup(true)}>Next Sentence</Button>
         </div>

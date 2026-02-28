@@ -4,12 +4,16 @@ import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, Table
 import { Input } from './ui/input';
 import { useEffect, useState } from 'react';
 import { getRandomSentence } from '@/lib/sentences';
+import { Button } from './ui/button';
+import { PopUpComponent } from './PopUpComponent';
 
 export const MainPage = () => {
   const [usertext, setUserText] = useState<string>('');
 
   const [getRandomSentence1, setRandomSentence] = useState(getRandomSentence());
   const [timeLeft, setTimeLeft] = useState(60);
+
+  const [showPopup, setShowPopup] = useState(false);
 
   // liczenie poprawnych slow
   const targetWords = getRandomSentence1.split(' ');
@@ -41,6 +45,30 @@ export const MainPage = () => {
 
   const accuracy1 = userTextArray.length > 0 ? Math.round((accuracy / userTextArray.length) * 100) : 100;
 
+  const saveLogic = () => {
+    const newplayerData = {
+      playerName: 'Guest',
+      liveProgress: usertext,
+      wordsPerMinute: wordsPerMin,
+      correctWords: correctWordsCount,
+      accuracy: accuracy,
+    };
+
+    const savedData = localStorage.getItem('player_stats');
+
+    const resultHistory = savedData ? JSON.parse(savedData) : [];
+
+    resultHistory.push(newplayerData);
+
+    localStorage.setItem('player_stats', JSON.stringify(resultHistory));
+  };
+
+  const testNextSentence = () => {
+    setRandomSentence(getRandomSentence());
+    setTimeLeft(60);
+    setUserText('');
+  };
+
   useEffect(() => {
     if (timeLeft <= 0) return;
     const timeout = setTimeout(() => {
@@ -63,6 +91,19 @@ export const MainPage = () => {
   return (
     <>
       <div className="flex flex-col justify-center items-center gap-12 ">
+        {showPopup && (
+          <PopUpComponent
+            onConfirm={() => {
+              saveLogic();
+              setShowPopup(false);
+              testNextSentence();
+            }}
+            onCancel={() => {
+              setShowPopup(false);
+              testNextSentence();
+            }}
+          ></PopUpComponent>
+        )}
         <Table>
           <TableHeader>
             <TableRow>
@@ -87,7 +128,22 @@ export const MainPage = () => {
         <p> Witaj, napisz jak najszybciej, oraz jak najdokładniej podane zdanie w ciągu 30 sekund</p>
         <p>Pozostły czas: {timeLeft} </p>
         <p>{getRandomSentence1}</p>
-        <Input value={usertext} onChange={(e) => setUserText(e.target.value)} placeholder="Enter text" className="max-w-2xl " />
+        <Input
+          value={usertext}
+          onChange={(e) => setUserText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setShowPopup(true);
+            }
+          }}
+          placeholder="Enter text"
+          className="max-w-2xl "
+        />
+
+        <div className="flex gap-4">
+          <Button onClick={() => saveLogic()}>Save your Progress</Button>
+          <Button onClick={() => setShowPopup(true)}>Next Sentence</Button>
+        </div>
       </div>
     </>
   );

@@ -14,16 +14,14 @@ export const ShowUserStats = ({ onCancel }: props) => {
       >
         <div className="overflow-y-auto">
           {resultHistory.map((record, index) => (
-            <>
-            <ul key={index} className='mb-4 border-b border-black'>
+            <ul key={index} className="mb-4 border-b border-black">
               {Object.entries(record).map(([key, val]) => (
-                <li>
+                <li key={key}>
                   <span className="font-semibold">{key}:</span>
                   <span> {val}</span>
                 </li>
               ))}
             </ul>
-            </>
           ))}
         </div>
         <div className="flex justify-center gap-4 ">

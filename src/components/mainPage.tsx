@@ -8,10 +8,14 @@ import { Button } from './ui/button';
 import { PopUpComponent } from './PopUpComponent';
 import { ShowUserStats } from './showUserStats';
 
-export const MainPage = () => {
+type props = {
+  initialSentence: string;
+};
+
+export const MainPage = ({ initialSentence }: props) => {
   const [usertext, setUserText] = useState<string>('');
 
-  const [getRandomSentence1, setRandomSentence] = useState(getRandomSentence());
+  const [getRandomSentence1, setRandomSentence] = useState(initialSentence);
   const [timeLeft, setTimeLeft] = useState(60);
 
   const [showPopup, setShowPopup] = useState(false);
@@ -66,8 +70,27 @@ export const MainPage = () => {
     localStorage.setItem('player_stats', JSON.stringify(resultHistory));
   };
 
+  let errorText;
+
+  const fetchNewSentence = async () => {
+    try {
+      const res = await fetch('https://dummyjson.com/quotes/random');
+
+      if (res.ok) {
+        const data = await res.json();
+        setRandomSentence(data.quote);
+      } else {
+        errorText = await res.text();
+        console.error(errorText);
+        setRandomSentence(getRandomSentence());
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const testNextSentence = () => {
-    setRandomSentence(getRandomSentence());
+    fetchNewSentence();
     setTimeLeft(60);
     setUserText('');
   };
@@ -85,7 +108,7 @@ export const MainPage = () => {
 
   useEffect(() => {
     if (timeLeft === 0) {
-      setRandomSentence(getRandomSentence());
+      fetchNewSentence();
       setTimeLeft(60);
       setUserText('');
     }
